@@ -7,7 +7,7 @@ st.title("🛡️ AI Security Intelligence Platform")
 
 st.markdown("Detect and analyze network threats using AI + LLM reasoning.")
 
-API_URL = "http://127.0.0.1:8000/analyze"
+API_URL =  "http://backend:8000/analyze"
 
 st.divider()
 
