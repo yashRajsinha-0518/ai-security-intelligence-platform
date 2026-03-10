@@ -1,0 +1,54 @@
+# AI Security Intelligence Platform - Walkthrough
+
+## Executive Summary
+I have successfully completed the rigorous overhaul of the AI Security Intelligence project. We transformed a fragile, structurally broken initial codebase into a fully robust, interpretable, and production-ready Security Operations Center (SOC) dashboard backed by XGBoost, FastAPI, and LLaMA3.
+
+---
+
+## 🏗️ Major Structural & Code Changes
+
+### Fixed the Critical Training Script
+The previous [model/train_model.py](file:///c:/AI-Security-Platform/model/train_model.py) was broken and couldn't run due to missing syntax and dataset bleeding. 
+* We created a modular ML lifecycle inside the `training/` pipeline consisting of [feature_engineer.py](file:///c:/AI-Security-Platform/training/feature_engineer.py), [experiment_tracker.py](file:///c:/AI-Security-Platform/training/experiment_tracker.py), [evaluation.py](file:///c:/AI-Security-Platform/training/evaluation.py), and [train_pipeline.py](file:///c:/AI-Security-Platform/training/train_pipeline.py).
+* We established reproducible evaluation metrics (`ROC-AUC`, `F1-score`, `Precision-Recall`), comparing Random Forest and XGBoost. The Pipeline artifacts are now cleanly persisted.
+
+### Addressed all 10 Weaknesses
+* **Data Leakage:** Dedicated Parquet files are now rigidly separate for Train and Test within the new pipeline.
+* **Explainability:** Added [inference/explainer.py](file:///c:/AI-Security-Platform/inference/explainer.py) powered by SHAP to convert raw numeric inputs into granular feature importance indicators (e.g., indicating the specific [rate](file:///c:/AI-Security-Platform/api/llm_explainer.py#17-53) or `sbytes` causing the anomaly).
+* **LLM Realism:** The integration directly pipes the anomalous SHAP triggers—rather than just an isolated "Attack" flag—to the Groq LLaMA copilot. The generated AI output now reasons based on actual traffic telemetry.
+* **Batch Analytics:** Provided a new `POST /analyze-csv` endpoint that securely evaluates entire PCAP derivatives inside `pandas`.
+
+### Transformed the UI into an SOC Dashboard
+* The Streamlit UI [dashboard/app.py](file:///c:/AI-Security-Platform/dashboard/app.py) was fundamentally redesigned around 3 tabs: **Single Analyst View**, **Batch Threat Hunting**, and **Model Intelligence**.
+* **Visual Additions:** Rendered SHAP importance utilizing Streamlit bar charts. Showcased `MLFlow / Local JSON` tracked pipelines via an interactive datagrid, enabling model validation checks directly through the UI.
+
+### Fortified Docker Constraints
+* Migrated the corrupted `UTF-16LE` requirement files safely back to `UTF-8`.
+* Added [.dockerignore](file:///c:/AI-Security-Platform/.dockerignore) for memory-optimized build contexts.
+* Wielded `pytest` frameworks inside [tests/test_api.py](file:///c:/AI-Security-Platform/tests/test_api.py) to assert Pydantic schema validation layers securely handle 422 constraints across inputs.
+
+---
+
+## 🚀 How to Operate the Platform
+
+### 1. Model Retraining (Offline MLOps)
+If you wish to update the core model logic, switch to your virtual environment and execute the pipeline:
+```bash
+python training/train_pipeline.py
+```
+This updates the models within the `models/` directory natively and generates `JSON` experiment metrics synced automatically to the SOC dashboard.
+
+### 2. Full Deployment Test
+Run the enterprise system utilizing Docker Compose:
+```bash
+docker compose up --build -d
+```
+1. Wait approx ~30s for the stack to fully boot.
+2. The UI is accessible natively at http://localhost:8501.
+
+### 3. Demonstrating to Recruiters
+When showcasing this to AI/ML Recruiter streams:
+1. Navigate to the `AI Security Platform` on your browser.
+2. In the **Single Analyst View** tab. Use the auto-populated 35 parameters to invoke a real-time REST trigger. Show off the SHAP visualizer and LLaMA threat reasoning simultaneously.
+3. Switch dynamically to the **Batch Threat Hunting** tab and upload a sample subset of `UNSW-NB15` telemetry inside a CSV block. Emphasize the vectoring of bulk anomaly detections locally.
+4. Navigate identically towards **Model Intelligence** tab—a unique discriminator revealing live JSON experiment trackers for robust ML lifecycles.

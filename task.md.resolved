@@ -1,0 +1,49 @@
+# Project Tasks
+
+## Phase 1 — Full Project Analysis
+- [x] Inspect all folders and files
+- [x] Identify syntax errors, runtime errors, architectural issues, data leakage risks, dependency problems, and bad design patterns
+- [x] Verify ML pipeline, API, UI, and Docker functionality
+- [x] Output a clear diagnostic report ([diagnostic_report.md](file:///C:/Users/sinha/.gemini/antigravity/brain/207c8ebf-a537-4537-b318-a58e7b860228/diagnostic_report.md))
+
+## Phase 2 — Fix All Existing Code Issues
+- [x] Resolve syntax and runtime errors
+- [x] Ensure clean Python structure and correct imports
+- [x] Fix API routes and Docker configuration
+- [x] Fix reproducible training pipeline, feature ordering, model loading
+- [x] Add proper logging
+- [x] Ensure `docker compose up` runs without errors
+
+## Phase 3 — Resolve 10 Project Weaknesses
+- [x] 1. Minimal Feature Engineering (meaningful features)
+- [x] 2. Weak Model Evaluation (ROC-AUC, Precision-Recall, F1, Confusion matrix, FPR)
+- [x] 3. No Model Explainability (SHAP integration)
+- [x] 4. Dataset Leakage Risk (strict split of train/val/test)
+- [x] 5. No Experiment Tracking (MLflow or structured logs)
+- [x] 6. Unrealistic User Input (CSV network flow upload)
+- [x] 7. Limited Model Exploration (XGBoost, Random Forest, Isolation Forest, Autoencoder)
+- [x] 8. Weak ML Pipeline Structure (refactor to training/, inference/, data/, models/, api/, dashboard/, configs/)
+- [x] 9. No Data Validation (schema validation for input data)
+- [x] 10. Cosmetic LLM Usage (real threat analysis instead of simple texts)
+
+## Phase 4 — Implement 4 Major Upgrades
+- [x] Upgrade 1: Model Explainability Dashboard (SHAP)
+- [x] Upgrade 2: Realistic Data Input (CSV upload)
+- [x] Upgrade 3: Model Comparison
+- [x] Upgrade 4: Real-Time Detection Simulation
+
+## Phase 5 — Build a Professional UI/UX
+- [x] Redesign Streamlit Dashboard as a SOC dashboard
+- [x] Add network traffic upload, attack probability, threat severity, model confidence, SHAP charts, LLM explanation, system health
+- [x] Make UI modern and recruiter-ready
+
+## Phase 6 — Prepare for Deployment
+- [x] Verify Docker setup and API/dashboard communication
+- [x] Clean [requirements.txt](file:///c:/AI-Security-Platform/requirements.txt)
+- [x] Optimize Docker images
+- [x] Ensure `docker compose up` runs smoothly
+
+## Phase 7 — Final Deliverable
+- [x] Final project structure check
+- [x] Updated code files evaluation
+- [x] Create documentation (Deployment, Training, Inference, Demo instructions)

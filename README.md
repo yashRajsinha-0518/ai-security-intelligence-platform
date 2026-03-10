@@ -1,214 +1,150 @@
-🛡️ AI Security Intelligence Platform
-# 🛡️ AI Security Intelligence Platform
+# 🛡️ Alpha SecOps: AI Security Intelligence Platform
 
-> An end-to-end AI-powered Intrusion Detection System combining Machine Learning + LLM-based Cyber Threat Intelligence.
+> An enterprise-grade, end-to-end AI-powered Intrusion Detection System (IDS) combining Machine Learning (XGBoost/RandomForest) with LLM-based Cyber Threat Intelligence (Groq LLaMA 3).
 
 ---
 
 ## 🚀 Overview
 
-The **AI Security Intelligence Platform** is a full-stack cybersecurity system that:
+The **Alpha SecOps AI Security Intelligence Platform** is a full-stack cybersecurity application built to mimic a modern Security Operations Center (SOC). It goes beyond traditional binary classification by offering:
 
-- Detects malicious network traffic using a trained ML model
-- Generates human-readable cyber threat explanations using LLM reasoning
-- Exposes REST APIs via FastAPI
-- Provides a real-time interactive dashboard using Streamlit
-
-Unlike traditional IDS projects that stop at classification accuracy, this system focuses on **interpretability and actionable intelligence**.
+- **Detection**: Identifies malicious network traffic anomalies with high accuracy.
+- **Explainability**: Uses SHAP (SHapley Additive exPlanations) to explain *why* a flow was flagged, highlighting the exact network parameters (e.g., specific byte loads, packet rates).
+- **Contextual Intelligence**: Feeds SHAP metrics and raw feature data natively into Groq's LLaMA 3 model to generate human-readable, factual threat intelligence reports for Tier-1 analysts.
+- **Batch Processing**: Allows security engineers to upload large CSV packet captures/flow schemas for bulk threat hunting.
+- **Experiment Tracking**: Natively tracks model versions, parameters, and evaluations using MLflow logs.
 
 ---
 
 ## 🧠 System Architecture
 
-
-Network Features → ML Model (XGBoost IDS)
-→ Attack / Normal Prediction
-→ LLM Reasoning Layer (Groq LLaMA)
-→ Human-Readable Threat Intelligence
-→ FastAPI Backend
-→ Streamlit Dashboard
-
+```mermaid
+graph LR
+    A[Raw Network Traffic / CSV] --> B[Feature Engineering & RobustScaling]
+    B --> C[XGBoost / RandomForest Classifier]
+    C --> D{Is Threat?}
+    D -- Yes --> E[SHAP Explainer Pipeline]
+    E --> F[Groq LLaMA 3 LLM]
+    F --> G[FastAPI Backend]
+    D -- No --> G
+    G --> H[Streamlit SOC Dashboard]
+```
 
 ---
 
 ## 🏗️ Tech Stack
 
-### 🔹 Machine Learning
-- XGBoost Classifier
-- Scikit-learn
-- Pandas / NumPy
-- UNSW-NB15 Dataset
+### 🔹 Machine Learning Pipeline
+- **Algorithms**: XGBoost Classifiers, Random Forest
+- **Libraries**: Scikit-learn, Pandas, NumPy, SHAP
+- **Tracking**: MLflow JSON tracking
+- **Dataset**: UNSW-NB15 Dataset
 
 ### 🔹 AI Reasoning
-- Groq API
-- LLaMA 3 Model
-- Structured Prompt Engineering
+- **LLM Engine**: Groq API
+- **Model**: LLaMA 3.1
+- **Technique**: Context-injected Prompt Engineering
 
-### 🔹 Backend
-- FastAPI
-- Uvicorn
-- REST API
-- OpenAPI (Swagger Docs)
+### 🔹 Backend & APIs
+- **Framework**: FastAPI (Uvicorn)
+- **Validation**: Pydantic Schema Validation
+- **Architecture**: RESTful Microservices
 
-### 🔹 Frontend
-- Streamlit
-- Interactive Dashboard UI
+### 🔹 Frontend & Deployment
+- **Dashboard**: Streamlit (Dark Theme Custom CSS)
+- **Infrastructure**: Docker, Docker Compose
+- **Testing**: Pytest
+
+---
+
+## ⚙️ Installation & Setup (Dockerized)
+
+The easiest and recommended way to run the application is via Docker Compose to ensure all environment dependencies and networking rules are mapped correctly.
+
+### 1️⃣ Clone Repository
+```bash
+git clone https://github.com/yourusername/ai-security-intelligence-platform.git
+cd ai-security-intelligence-platform
+```
+
+### 2️⃣ Configure Environment Variables
+Create a `.env` file in the root directory:
+```bash
+# Required for Threat Intelligence LLM insights
+GROQ_API_KEY=your_groq_api_key_here
+```
+*(Never commit your `.env` to version control!)*
+
+### 3️⃣ Launch with Docker Compose
+```bash
+docker compose up --build -d
+```
+This command will quietly build both the backend API and the frontend SOC dashboard, attach the necessary volumes for logs, and expose the ports to your local host.
+
+---
+
+## ▶️ Usage & Endpoints
+
+Once Docker finishes building and the services are healthy, you can access:
+
+### 🛡️ SOC Streamlit Dashboard
+Navigate to your browser:
+**[http://localhost:8501](http://localhost:8501)**
+
+The dashboard features three main tabs:
+1. **Single Analyst View**: For manual triage of specific network flows.
+2. **Batch Threat Hunting**: Upload `CSV` network files for bulk evaluation.
+3. **Model Intelligence**: View local MLflow tracked experiments, hyperparameter values, and performance metrics (Accuracy, F1, ROC-AUC, FPR).
+
+### ⚙️ FastAPI Swagger UI
+Navigate to your browser:
+**[http://localhost:8000/docs](http://localhost:8000/docs)**
+
+| Method | Endpoint | Description |
+|--------|----------|------------|
+| `GET`    | `/`        | Health check |
+| `POST`   | `/predict` | Raw binary prediction logic |
+| `POST`   | `/analyze` | Full ML Inference + SHAP Evaluation + LLM Generation |
+| `POST`   | `/analyze-csv`| Accepts `.csv` file uploads for bulk threat predictions |
 
 ---
 
 ## 📦 Project Structure
 
-
+```text
 AI-Security-Platform/
 │
-├── api/ # FastAPI backend + LLM integration
-├── dashboard/ # Streamlit frontend
-├── model/ # Trained model + preprocessing artifacts
-├── data/ # UNSW dataset
-├── utils/ # Helper modules
-├── requirements.txt
-├── .env.example
-└── README.md
-
-
----
-
-## ⚙️ Installation & Setup
-
-### 1️⃣ Clone Repository
-
-
-git clone https://github.com/yourusername/ai-security-intelligence-platform.git
-
-cd ai-security-intelligence-platform
-
+├── api/                  # FastAPI backend + Groq integration
+├── configs/              # TBD Configuration settings
+├── dashboard/            # Streamlit frontend SOC interface
+├── data/                 # Raw UNSW parquet files
+├── inference/            # Model loading & SHAP explanation logic
+├── mlflow_tracking/      # Offline JSON experiment logs mapped via Docker volume
+├── models/               # pre-compiled XGBoost pipeline (.pkl)
+├── tests/                # Pytest endpoints
+├── training/             # Feature Engineering, ML pipelines, Evaluation logic
+│
+├── docker-compose.yml
+├── Dockerfile.backend
+├── Dockerfile.dashboard
+├── .dockerignore
+└── requirements.txt
+```
 
 ---
 
-### 2️⃣ Create Virtual Environment
-
-
-python -m venv venv
-venv\Scripts\activate # Windows
-
-
----
-
-### 3️⃣ Install Dependencies
-
-
-pip install -r requirements.txt
-
-
----
-
-### 4️⃣ Configure Environment Variables
-
-Create a `.env` file:
-
-
-GROQ_API_KEY=your_api_key_here
-
-
-⚠️ Never upload your `.env` file to GitHub.
-
----
-
-## ▶️ Running The Project
-
-### 🔹 Start Backend
-
-
-uvicorn api.main:app --reload
-
-
-API Docs available at:
-
-
-http://127.0.0.1:8000/docs
-
-
----
-
-### 🔹 Start Dashboard
-
-Open a new terminal:
-
-
-streamlit run dashboard/app.py
-
-
-Dashboard available at:
-
-
-http://localhost:8501
-
-
----
-
-## 🧪 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|------------|
-| GET    | /        | Health check |
-| POST   | /predict | Run ML prediction |
-| GET    | /explain/{prediction} | Generate AI explanation |
-| POST   | /analyze | Full ML + LLM pipeline |
-
----
-
-## 🎯 Key Features
-
-✔ Intrusion Detection using XGBoost  
-✔ Mixed-type network feature preprocessing  
-✔ Robust categorical encoding  
-✔ Model artifact persistence  
-✔ LLM-powered threat explanation  
-✔ RESTful microservice architecture  
-✔ Interactive visualization dashboard  
-
----
-
-## 🧠 Design Philosophy
-
-Traditional IDS systems answer:
-
-> "Is this malicious?"
-
-This platform answers:
-
-> "Is this malicious, why, how dangerous is it, and what should be done?"
-
-By combining statistical detection with LLM-based reasoning, the system bridges the gap between detection and actionable security intelligence.
-
----
-
-## 📊 Dataset
-
-- UNSW-NB15 Network Intrusion Dataset
-- Binary classification: Normal vs Attack
-- Real-world simulated network telemetry
-
----
-
-## 🚀 Future Improvements
-
-- Docker containerization
-- Cloud deployment (Render / AWS)
-- CSV upload support
-- Real-time streaming detection
-- Threat severity scoring
-- Attack heatmap visualization
+## � Local Model Re-Training (Without Docker)
+If you wish to experiment with hyperparameters or add new algorithms:
+1. Create a `venv` and `pip install -r requirements.txt`.
+2. Run `python training/train_pipeline.py`.
+3. The script will automatically parse the datasets, train the models iteratively, and save the model with the highest `F1-Score` to the `models/` folder, replacing the older version.
 
 ---
 
 ## 👨‍💻 Author
-
-Yash Sinha  
-AI / ML & Systems Engineering Enthusiast  
+**Yash Sinha**  
+*AI / ML & Systems Engineering Enthusiast*
 
 ---
-
 ## 📜 License
-
 MIT License

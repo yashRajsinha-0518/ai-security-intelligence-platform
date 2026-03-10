@@ -19,4 +19,8 @@ services:
       - "8501:8501"
     depends_on:
       - backend
+    environment:
+      - API_URL=http://backend:8000
+    volumes:
+      - ./mlflow_tracking:/app/mlflow_tracking
     restart: always

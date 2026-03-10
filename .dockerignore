@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.env
+data/
+mlflow_tracking/
+tests/
+models/*.json
+models/*.csv
+# BUT keep ids_pipeline.pkl and feature_columns.pkl inside models
