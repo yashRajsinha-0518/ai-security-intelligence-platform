@@ -3,6 +3,9 @@ import requests
 import pandas as pd
 import json
 import os
+import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(page_title="SOC AI Operations", layout="wide", initial_sidebar_state="expanded")
 
@@ -21,7 +24,7 @@ st.markdown("Monitor, analyze, and interpret network traffic using **XGBoost & G
 API_URL = os.getenv("API_URL", "http://backend:8000")
 
 # Tabs
-tab1, tab2, tab3 = st.tabs(["🔍 Single Analyst View", "📂 Batch Threat Hunting", "🧠 Model Intelligence"])
+tab1, tab2, tab3, tab4 = st.tabs(["🔍 Single Analyst View", "📂 Batch Threat Hunting", "🧠 Model Intelligence", "📊 Data & Analytics Hub"])
 
 with tab1:
     st.subheader("Manual Threat Analysis")
@@ -135,3 +138,89 @@ with tab3:
             st.info("No experiment logs found. Run `python training/train_pipeline.py` to populate.")
     except Exception as e:
         st.warning("Could not load tracking metrics.")
+
+with tab4:
+    st.subheader("📊 Data & Analytics Hub")
+    st.markdown("Upload a network CSV batch to unlock Macro-Level Descriptive & Diagnostic Analytics.")
+    
+    analytics_file = st.file_uploader("Upload Network Batch for Analytics", type=["csv"], key="analytics_uploader")
+    
+    if analytics_file is not None:
+        if st.button("📊 Generate Analytics Report"):
+            with st.spinner("Profiling dataset, extracting statistical insights, and querying GenAI..."):
+                files = {"file": (analytics_file.name, analytics_file.getvalue(), "text/csv")}
+                res = requests.post(f"{API_URL}/analytics/batch-profile", files=files)
+                
+                if res.status_code == 200:
+                    data = res.json()
+                    st.success("Analytics generated successfully!")
+                    
+                    sub1, sub2, sub3, sub4 = st.tabs([
+                        "📈 Traffic & Attack Intelligence", 
+                        "🔍 Feature Insights & Distributions", 
+                        "🩺 Dataset Health & Quality",
+                        "🤖 Automated Business Insights"
+                    ])
+                    
+                    with sub1:
+                        st.markdown("### Attack Intelligence")
+                        attack_dist = data["attack_distribution"]
+                        
+                        colA, colB = st.columns(2)
+                        with colA:
+                            st.metric("Total Flows Analyzed", data["health_report"]["total_rows"])
+                            st.metric("Total Attacks Detected", attack_dist["overall"]["attack"])
+                            
+                        with colB:
+                            st.metric("Normal Traffic Flows", attack_dist["overall"]["normal"])
+                            
+                        if "by_protocol" in attack_dist and attack_dist["by_protocol"]:
+                            proto_df = pd.DataFrame(list(attack_dist["by_protocol"].items()), columns=["Protocol", "Count"])
+                            fig = px.pie(proto_df, values='Count', names='Protocol', title='Attacks by Protocol', hole=0.4)
+                            st.plotly_chart(fig, use_container_width=True)
+                            
+                        if "by_service" in attack_dist and attack_dist["by_service"]:
+                            srv_df = pd.DataFrame(list(attack_dist["by_service"].items()), columns=["Service", "Count"])
+                            fig2 = px.bar(srv_df, x='Service', y='Count', title='Attacks by Service')
+                            st.plotly_chart(fig2, use_container_width=True)
+                            
+                    with sub2:
+                        st.markdown("### Feature Insights & Correlations")
+                        corr = data["correlation_matrix"]
+                        if corr["features"] and corr["matrix"]:
+                            st.markdown("#### Pearson Correlation Heatmap (Numerical Features)")
+                            fig, ax = plt.subplots(figsize=(10, 8))
+                            sns.heatmap(corr["matrix"], xticklabels=corr["features"], yticklabels=corr["features"], 
+                                        cmap="coolwarm", annot=False, ax=ax)
+                            st.pyplot(fig)
+                            
+                        st.markdown("### Statistical Outliers (IQR Method)")
+                        outliers = data["statistical_outliers"]
+                        if outliers:
+                            outlier_data = []
+                            for feat, stats in outliers.items():
+                                outlier_data.append({
+                                    "Feature": feat,
+                                    "Outliers Count": stats["outlier_count"],
+                                    "Outlier %": f"{stats['outlier_percentage']:.2f}%"
+                                })
+                            st.dataframe(pd.DataFrame(outlier_data), use_container_width=True)
+                            
+                    with sub3:
+                        st.markdown("### Dataset Health & Quality")
+                        st.json(data["health_report"])
+                        
+                        st.markdown("### Base Statistical Moments")
+                        moments = data["statistical_moments"]
+                        if moments:
+                            moments_df = pd.DataFrame(moments).T
+                            st.dataframe(moments_df, use_container_width=True)
+                            
+                    with sub4:
+                        st.markdown("### 🤖 GenAI Business Insights")
+                        st.info("The following insights were automatically generated by analyzing the batch statistics:")
+                        for insight in data["business_insights"]:
+                            st.markdown(insight)
+                            
+                else:
+                    st.error(f"API Error during batch profiling: {res.text}")

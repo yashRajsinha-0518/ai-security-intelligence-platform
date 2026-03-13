@@ -12,6 +12,8 @@ The **Alpha SecOps AI Security Intelligence Platform** is a full-stack cybersecu
 - **Explainability**: Uses SHAP (SHapley Additive exPlanations) to explain *why* a flow was flagged, highlighting the exact network parameters (e.g., specific byte loads, packet rates).
 - **Contextual Intelligence**: Feeds SHAP metrics and raw feature data natively into Groq's LLaMA 3 model to generate human-readable, factual threat intelligence reports for Tier-1 analysts.
 - **Batch Processing**: Allows security engineers to upload large CSV packet captures/flow schemas for bulk threat hunting.
+- **Data Analytics Hub**: Extracts macro-level descriptive and diagnostic analytics (Dataset Profiling, Attack Trend Analysis, Feature Correlation Heatmaps, and Statistical Outlier Detection).
+- **Automated Business Insights**: Dynamically generates business-focused intelligence reports from batch aggregations using Groq LLaMA 3.
 - **Experiment Tracking**: Natively tracks model versions, parameters, and evaluations using MLflow logs.
 
 ---
@@ -44,6 +46,11 @@ graph LR
 - **LLM Engine**: Groq API
 - **Model**: LLaMA 3.1
 - **Technique**: Context-injected Prompt Engineering
+
+### 🔹 Data Analytics & Visualization
+- **EDA & Profiling**: Pandas, NumPy
+- **Heatmaps & Outliers**: Seaborn, SciPy (IQR Method)
+- **Interactive Dashboards**: Plotly Express
 
 ### 🔹 Backend & APIs
 - **Framework**: FastAPI (Uvicorn)
@@ -91,10 +98,11 @@ Once Docker finishes building and the services are healthy, you can access:
 Navigate to your browser:
 **[http://localhost:8501](http://localhost:8501)**
 
-The dashboard features three main tabs:
+The dashboard features four main tabs:
 1. **Single Analyst View**: For manual triage of specific network flows.
 2. **Batch Threat Hunting**: Upload `CSV` network files for bulk evaluation.
 3. **Model Intelligence**: View local MLflow tracked experiments, hyperparameter values, and performance metrics (Accuracy, F1, ROC-AUC, FPR).
+4. **Data & Analytics Hub**: An advanced workspace containing interactive Plotly visualiztions for traffic intelligence, seaborn feature correlations, dataset health matrices, and GenAI business insights.
 
 ### ⚙️ FastAPI Swagger UI
 Navigate to your browser:
@@ -106,6 +114,7 @@ Navigate to your browser:
 | `POST`   | `/predict` | Raw binary prediction logic |
 | `POST`   | `/analyze` | Full ML Inference + SHAP Evaluation + LLM Generation |
 | `POST`   | `/analyze-csv`| Accepts `.csv` file uploads for bulk threat predictions |
+| `POST`   | `/analytics/batch-profile`| Full Data Profiling, IQR Outlier Detection, Correlation Matrices, ML Inference + Batch LLM Insight Generation |
 
 ---
 
@@ -115,6 +124,7 @@ Navigate to your browser:
 AI-Security-Platform/
 │
 ├── api/                  # FastAPI backend + Groq integration
+│   ├── analytics/        # (NEW) Pandas/Plotly Statistical Modules + Business Insight Generators
 ├── configs/              # TBD Configuration settings
 ├── dashboard/            # Streamlit frontend SOC interface
 ├── data/                 # Raw UNSW parquet files

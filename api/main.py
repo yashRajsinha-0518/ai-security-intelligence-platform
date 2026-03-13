@@ -12,6 +12,12 @@ from training.feature_engineer import add_engineered_features
 from inference.explainer import ShapExplainer
 from api.llm_explainer import generate_explanation
 
+from api.analytics.dataset_profiling import generate_dataset_health
+from api.analytics.attack_distribution import calculate_attack_distribution
+from api.analytics.feature_correlation import calculate_correlation_matrix
+from api.analytics.statistical_summary import detect_outliers_iqr, calculate_statistical_moments
+from api.analytics.insight_generator import generate_batch_insights
+
 app = FastAPI(title="AI Security Intelligence API")
 
 # =========================
@@ -165,3 +171,69 @@ async def analyze_csv(file: UploadFile = File(...)):
         })
         
     return {"results": results}
+
+# =========================
+# BATCH ANALYTICS & PROFILING
+# =========================
+@app.post("/analytics/batch-profile")
+async def analyze_and_profile_csv(file: UploadFile = File(...)):
+    contents = await file.read()
+    input_df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
+    
+    # 1. Dataset Profiling
+    health_report = generate_dataset_health(input_df)
+    
+    # 2. Statistical Analysis
+    correlation_matrix = calculate_correlation_matrix(input_df)
+    outliers = detect_outliers_iqr(input_df)
+    moments = calculate_statistical_moments(input_df)
+    
+    # Feature engineering for inference
+    try:
+        engineered_df = add_engineered_features(input_df.copy())
+    except Exception as e:
+        engineered_df = input_df.copy() # fallback
+        print(f"Feature engineering error: {e}")
+        
+    cols = [c for c in feature_columns if c in engineered_df.columns]
+    
+    # Add missing cols with 0
+    for c in cols:
+        if c not in engineered_df.columns:
+            engineered_df[c] = 0
+            
+    engineered_df = engineered_df[cols]
+    
+    # 3. Model Inference
+    preds = pipeline.predict(engineered_df)
+    preds = [int(p) for p in preds]
+    
+    results = []
+    for i, p in enumerate(preds):
+        results.append({
+            "row": i,
+            "prediction": p,
+            "label": "Attack" if p == 1 else "Normal"
+        })
+        
+    # 4. Attack Distribution
+    attack_dist = calculate_attack_distribution(input_df, preds)
+    
+    # 5. Insight Generation
+    summary_for_llm = {
+        "total_flows": health_report["total_rows"],
+        "attack_distribution": attack_dist["overall"],
+        "top_attack_protocols": list(attack_dist.get("by_protocol", {}).items())[:5],
+        "outliers_found": {k: v["outlier_count"] for k, v in outliers.items() if v["outlier_count"] > 0}
+    }
+    insights = generate_batch_insights(summary_for_llm)
+    
+    return {
+        "health_report": health_report,
+        "correlation_matrix": correlation_matrix,
+        "statistical_outliers": outliers,
+        "statistical_moments": moments,
+        "attack_distribution": attack_dist,
+        "business_insights": insights,
+        "results": results
+    }
