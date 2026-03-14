@@ -18,7 +18,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🛡️ Alpha SecOps: AI Intelligence Platform")
+st.title("🛡️ Aegis: AI Intelligence Platform")
 st.markdown("Monitor, analyze, and interpret network traffic using **XGBoost & Groq LLaMA**.")
 
 API_URL = os.getenv("API_URL", "http://backend:8000")

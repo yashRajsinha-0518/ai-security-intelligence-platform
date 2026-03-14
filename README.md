@@ -1,4 +1,4 @@
-# 🛡️ Alpha SecOps: AI Security Intelligence Platform
+# 🛡️ Aegis: AI Security Intelligence Platform
 
 > An enterprise-grade, end-to-end AI-powered Intrusion Detection System (IDS) combining Machine Learning (XGBoost/RandomForest) with LLM-based Cyber Threat Intelligence (Groq LLaMA 3).
 
@@ -6,7 +6,7 @@
 
 ## 🚀 Overview
 
-The **Alpha SecOps AI Security Intelligence Platform** is a full-stack cybersecurity application built to mimic a modern Security Operations Center (SOC). It goes beyond traditional binary classification by offering:
+The **Aegis AI Security Intelligence Platform** is a full-stack cybersecurity application built to mimic a modern Security Operations Center (SOC). It goes beyond traditional binary classification by offering:
 
 - **Detection**: Identifies malicious network traffic anomalies with high accuracy.
 - **Explainability**: Uses SHAP (SHapley Additive exPlanations) to explain *why* a flow was flagged, highlighting the exact network parameters (e.g., specific byte loads, packet rates).
